@@ -13,7 +13,14 @@ find_package(Qt6 COMPONENTS
         Network
         REQUIRED)
 
-add_executable(Server main.cpp Sender.h Sender.cpp Cryprograph.cpp Cryptograph.h Server.cpp Server.h User.cpp User.h Command.h CommandSendKey.cpp CommandReplyKey.h)
+add_executable(Server main.cpp
+        Sender.h Sender.cpp
+        Cryprograph.cpp Cryptograph.h
+        Server.cpp Server.h
+        User.cpp User.h
+        commands/Command.h
+        commands/CommandReplyKey.h commands/CommandReplyKey.cpp
+        commands/CommandLogin.cpp commands/CommandLogin.h commands/CommandRegist.cpp commands/CommandRegist.h commands/CommandUpdateOnline.cpp commands/CommandUpdateOnline.h)
 target_link_libraries(Server
         Qt::Core
         Qt::Sql

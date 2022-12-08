@@ -12,8 +12,10 @@
 #include "Sender.h"
 #include "User.h"
 
-#include "Command.h"
-#include "CommandReplyKey.h"
+#include "commands/Command.h"
+#include "commands/CommandReplyKey.h"
+#include "commands/CommandLogin.h"
+#include "commands/CommandRegist.h"
 
 
 class Server : public QObject {
@@ -32,6 +34,9 @@ private:
     QSharedPointer<QThread> threadBroadcast_;
     QSharedPointer<Sender> senderBroadcast_;
     const unsigned short SERVER_PORT = 7777;
+
+    QSharedPointer<Command> parse(const QJsonDocument &doc, QSharedPointer<User> &user);
+
 private slots:
 
     void newUser();

@@ -1,4 +1,3 @@
-
 #include <iostream>
 #include "User.h"
 
@@ -55,8 +54,8 @@ QByteArray User::decode(const QByteArray &arr) const {
     }
     memcpy(res.data(), array, long_size);
     QString str(res);
-    for (int i = 0; i < str.size(); ++i){
-        if (str[i] == '\0'){
+    for (int i = 0; i < str.size(); ++i) {
+        if (str[i] == '\0') {
             str.resize(i);
             break;
         }
@@ -67,4 +66,12 @@ QByteArray User::decode(const QByteArray &arr) const {
 
 long long User::getKeyToAlice() const {
     return crypto_.getKeyToAlice();
+}
+
+unsigned int User::getUserIdInDataBase() const {
+    return UserIDInDataBase_;
+}
+
+void User::setUserIdInDataBase(unsigned int userIdInDataBase) {
+    UserIDInDataBase_ = userIdInDataBase;
 }

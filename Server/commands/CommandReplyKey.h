@@ -4,7 +4,6 @@
 #include <QSharedPointer>
 
 #include "Command.h"
-#include "User.h"
 
 
 class CommandReplyKey : public Command {

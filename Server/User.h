@@ -18,14 +18,19 @@ public:
 
     void setHasSessionKey(bool hasSessionKey);
 
-    QByteArray decode(const QByteArray &arr) const;
+    [[nodiscard]] QByteArray decode(const QByteArray &arr) const;
 
-    long long getKeyToAlice() const;
+    [[nodiscard]] long long getKeyToAlice() const;
+
+    unsigned int getUserIdInDataBase() const;
+
+    void setUserIdInDataBase(unsigned int userIdInDataBase);
 
 private:
     bool hasSessionKey_;
     CryptographBob crypto_;
     QString userName_;
+    unsigned int UserIDInDataBase_ = 0;
 };
 
 
