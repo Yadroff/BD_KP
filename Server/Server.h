@@ -16,6 +16,7 @@
 #include "commands/CommandReplyKey.h"
 #include "commands/CommandLogin.h"
 #include "commands/CommandRegist.h"
+#include "commands/CommandExit.h"
 
 
 class Server : public QObject {
@@ -27,13 +28,13 @@ public:
 
 private:
     QTcpServer *server_;
-    QMap<long long, QSharedPointer<QTcpSocket>> clients_; // [clientID, socket]
     bool isListen_ = false; // статус
-    QMap<QSharedPointer<QTcpSocket>, QSharedPointer<User> > users_;// пользователи
+    QMap<QTcpSocket *, QSharedPointer<User> > clients_;// пользователи
     QSqlDatabase database_;
     QSharedPointer<QThread> threadBroadcast_;
     QSharedPointer<Sender> senderBroadcast_;
     const unsigned short SERVER_PORT = 7777;
+    QHash<QString, QSharedPointer<User>> users_;
 
     QJsonDocument parse(const QJsonDocument &doc, QSharedPointer<User> &user);
 

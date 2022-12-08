@@ -54,7 +54,8 @@ bool CommandLogin::login() {
         return true;
     }
     std::cout << qry.lastError().text().toStdString() << std::endl;
-    obj["Result"] = "Fail";
+    obj["Result"] = "SERVER FAIL";
+    res_.setObject(obj);
     return false;
 }
 

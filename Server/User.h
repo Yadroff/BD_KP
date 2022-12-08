@@ -34,6 +34,10 @@ public:
 
     QSharedPointer<QMap<QString, unsigned long long int>> &getContacts();
 
+    [[nodiscard]] const QString &getUserName() const;
+
+    void setUserName(const QString &userName);
+
 private:
     bool hasSessionKey_;
     CryptographBob crypto_;

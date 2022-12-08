@@ -21,14 +21,15 @@ const QString SEPARATOR = QString(QChar(7));
 #define COMMAND_CONTACTS "CONTACTS"
 #define COMMAND_UNREAD_MESSAGES "UNREAD MESSAGES"
 #define COMMAND_ADMIN_LIST "ADMIN LIST"
-
+#define COMMAND_EXIT "USER EXIT"
 
 #define PATH_TO_LOGIN "./sql/CheckInDB.sql"
 #define PATH_TO_REGIST "./sql/AddUser.sql"
-#define PATH_TO_UPDATE_ONLINE "./sql/updateOnline.sql"
+#define PATH_TO_UPDATE_ONLINE "./sql/UpdateOnline.sql"
 #define PATH_TO_CONTACTS "./sql/GetContactsByNickname.sql"
-#define PATH_TO_UNREAD_MESSAGES "./sql/countUnreadMessage.sql"
+#define PATH_TO_UNREAD_MESSAGES "./sql/CountUnreadMessage.sql"
 #define PATH_TO_ADMIN_LIST "./sql/CheckIsUserAdmin.sql"
+#define PATH_TO_EXIT "./sql/ExitUser.sql"
 
 #define PATH_TO_DATABASE "database.db"
 

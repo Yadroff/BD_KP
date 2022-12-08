@@ -20,7 +20,7 @@ void Sender::run()
     std::cout << "SENDER: START SENDING" << std::endl;
     while (runFlag_){
         socket_->writeDatagram(DATAGRAM_TO_CLIENT, QHostAddress::Broadcast, SERVER_PORT);
-        QThread::sleep(2);
+        QThread::sleep(1);
     }
     std::cout << "SERVER: END SENDING" << std::endl;
     emit finished();

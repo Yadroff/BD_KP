@@ -40,12 +40,10 @@ void Server::newUser() {
     if (isListen_) {
         while (server_->hasPendingConnections()) {
             std::cout << QTime::currentTime().toString().toStdString() << " SERVER: OPERATION: NEW USER" << std::endl;
-            auto _client = QSharedPointer<QTcpSocket>(server_->nextPendingConnection());
-            auto _id = _client->socketDescriptor();
-            clients_[_id] = _client;
-            users_[_client] = QSharedPointer<User>(new User());
-            connect(_client.get(), SIGNAL(readyRead()), this, SLOT(readData()));
-            connect(_client.get(), SIGNAL(disconnected()), this, SLOT(disconnectUser()));
+            auto _client = server_->nextPendingConnection();
+            clients_[_client] = QSharedPointer<User>(new User());
+            connect(_client, SIGNAL(readyRead()), this, SLOT(readData()));
+            connect(_client, SIGNAL(disconnected()), this, SLOT(disconnectUser()));
         }
     }
 }
@@ -54,71 +52,73 @@ void Server::shutDownServer() {
     if (!isListen_) {
         return;
     }
+    CommandExit com("");
             foreach(auto item, clients_.keys()) {
-            clients_[item]->close();
+            com.setNick(clients_[item]->getUserName());
+            com.exec();
             clients_.remove(item);
-            std::cout << QTime::currentTime().toString().toStdString() << " SERVER: OPERATION: REMOVE " << item
-                      << " CLIENT"
-                      << std::endl;
+            std::cout << QTime::currentTime().toString().toStdString() << " SERVER: OPERATION: REMOVE "
+                      << item->socketDescriptor() << " CLIENT" << std::endl;
+            item->close();
+            item->deleteLater();
         }
     server_->close();
-    std::cout << QTime::currentTime().toString().toStdString() << "SERVER: STATE: CLOSED" << std::endl;
+    std::cout << QDateTime::currentDateTimeUtc().toLocalTime().toString().toStdString() << "SERVER: STATE: CLOSED"
+              << std::endl;
     isListen_ = false;
 }
 
 void Server::readData() {
-            foreach(auto _client, clients_.values()) {
-            if (_client->bytesAvailable()) {
-                QByteArray _readBuff = _client->readAll();
-                auto _user = users_[_client];
-                _readBuff = _user->decode(_readBuff);
-                std::cout << _readBuff.toStdString() << std::endl;
-                QJsonDocument doc;
-                QJsonParseError parser;
-                doc = QJsonDocument::fromJson(_readBuff, &parser);
-                if (parser.error != QJsonParseError::NoError) {
-                    std::cout << QTime::currentTime().toString().toStdString()
-                              << " SERVER: ERROR: PARSE BYTES ARRAY TO JSON\n"
-                              << parser.errorString().toStdString() << std::endl;
-                }
-                QJsonDocument ans;
-                /*auto obj = doc.object();
-                auto command = obj["Command"].toString();
-                if (command == COMMAND_SEND_KEY) {
-                    CommandReplyKey com(_user, obj["Key"].toInteger());
-                    ans = com.exec();
-                } else if (command == COMMAND_LOGIN) {
-                    CommandLogin com(_user, obj["Login"].toString(), obj["Password"].toInteger());
-                    ans = com.exec();
-                } else {
-                    std::cout << QTime::currentTime().toString().toStdString()
-                              << " SERVER: ERROR: UNKNOWN COMMAND FROM USER " << _client->socketDescriptor()
-                              << std::endl;
-                }*/
-                ans = parse(doc, _user);
-                QByteArray res = ans.toJson(QJsonDocument::Indented);
-                std::cout << QTime::currentTime().toString().toStdString() << " SERVER: REPLY\n" << res.toStdString()
-                          << std::endl;
-                _client->write(_user->encode(res));
-                _user->setHasSessionKey(true);
-            }
+    auto _client = (QTcpSocket *) sender();
+    if (_client->bytesAvailable()) {
+        QByteArray _readBuff = _client->readAll();
+        auto _user = clients_[_client];
+        _readBuff = _user->decode(_readBuff);
+        std::cout << _readBuff.toStdString() << std::endl;
+        QJsonDocument doc;
+        QJsonParseError parser;
+        doc = QJsonDocument::fromJson(_readBuff, &parser);
+        if (parser.error != QJsonParseError::NoError) {
+            std::cout << QTime::currentTime().toString().toStdString()
+                      << " SERVER: ERROR: PARSE BYTES ARRAY TO JSON\n"
+                      << parser.errorString().toStdString() << std::endl;
         }
+        QJsonDocument ans;
+        /*auto obj = doc.object();
+        auto command = obj["Command"].toString();
+        if (command == COMMAND_SEND_KEY) {
+            CommandReplyKey com(_user, obj["Key"].toInteger());
+            ans = com.exec();
+        } else if (command == COMMAND_LOGIN) {
+            CommandLogin com(_user, obj["Login"].toString(), obj["Password"].toInteger());
+            ans = com.exec();
+        } else {
+            std::cout << QTime::currentTime().toString().toStdString()
+                      << " SERVER: ERROR: UNKNOWN COMMAND FROM USER " << _client->socketDescriptor()
+                      << std::endl;
+        }*/
+        ans = parse(doc, _user);
+        QByteArray res = ans.toJson(QJsonDocument::Indented);
+        std::cout << QTime::currentTime().toString().toStdString() << " SERVER: REPLY\n" << res.toStdString()
+                  << std::endl;
+        _client->write(_user->encode(res));
+        _user->setHasSessionKey(true);
+    }
 }
 
 void Server::disconnectUser() {
-    auto _client = QSharedPointer<QTcpSocket>(qobject_cast<QTcpSocket *>(sender()));
-    std::cout << "OK" << std::endl;
-    long long _id = -1;
-    if (_client) {
-        for (auto it = clients_.begin(); it != clients_.end(); ++it) {
-            if (it.value() == _client) {
-                _id = it.key();
-                clients_.erase(it);
-                break;
-            }
+    auto client = (QTcpSocket *) sender();
+    if (client) {
+        auto userName = clients_[client]->getUserName();
+        if (!userName.isEmpty()) {
+            CommandExit cmd(userName);
+            users_.remove(userName);
+            std::cout << cmd.exec().toJson(QJsonDocument::Indented).toStdString() << std::endl;
         }
+        clients_.remove(client);
+        client->deleteLater();
     }
-    std::cout << QTime::currentTime().toString().toStdString() << " SERVER: OPERATION DISCONNECT " << _id << std::endl;
+    std::cout << QTime::currentTime().toString().toStdString() << " SERVER: OPERATION DISCONNECT" << std::endl;
 }
 
 QJsonDocument Server::parse(const QJsonDocument &doc, QSharedPointer<User> &user) {
@@ -130,8 +130,13 @@ QJsonDocument Server::parse(const QJsonDocument &doc, QSharedPointer<User> &user
         res = com.exec();
 //        CommandReplyKey com(user, obj["Key"].toInteger());
     } else if (command == COMMAND_LOGIN) {
-        CommandLogin com(user, obj["Login"].toString(), obj["Password"].toInteger());
+        QString login = obj["Login"].toString();
+        CommandLogin com(user, login, obj["Password"].toInteger());
         res = com.exec();
+        if (res.object()["Result"].toString() == "SUCCESS") {
+            user->setUserName(login);
+            users_.insert(login, user);
+        }
 //        CommandLogin com();
 //        res = QSharedPointer<Command>(new CommandLogin(user, obj["Login"].toString(), obj["Password"].toInteger()));
     } else if (command == COMMAND_REGIST) {

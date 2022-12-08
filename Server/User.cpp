@@ -94,3 +94,11 @@ unsigned long long User::getIDContact(const QString &id) {
     return 0;
 }
 
+const QString &User::getUserName() const {
+    return userName_;
+}
+
+void User::setUserName(const QString &userName) {
+    userName_ = userName;
+}
+
