@@ -17,14 +17,16 @@ QByteArray User::encode(const QByteArray &arr) {
 //    std::cout << res.size() % _long_size << std::endl;
     auto *array = new long long[res.size() / _long_size];
     memcpy(array, res.data(), _long_size);
-    for (int i = 0; i < res.size(); ++i) {
+    for (int i = 0; i < res.size() / _long_size; ++i) {
         array[i] = array[i] ^ key;
     }
     memcpy(res.data(), array, _long_size);
     return res;
 }
 
-User::User() : hasSessionKey_(false) {}
+User::User() : hasSessionKey_(false) {
+    contacts_ = QSharedPointer<QMap<QString, unsigned long long>>(new QMap<QString, unsigned long long>);
+}
 
 void User::setKeyFromAlice(const long long &key) {
     crypto_.setKeyFromAlice(key);
@@ -75,3 +77,20 @@ unsigned int User::getUserIdInDataBase() const {
 void User::setUserIdInDataBase(unsigned int userIdInDataBase) {
     UserIDInDataBase_ = userIdInDataBase;
 }
+
+void User::addContact(const unsigned long long int &id, const QString &nick) {
+    auto map = contacts_.get();
+    (*map)[nick] = id;
+}
+
+QSharedPointer<QMap<QString, unsigned long long int>> &User::getContacts() {
+    return contacts_;
+}
+
+unsigned long long User::getIDContact(const QString &id) {
+    if (contacts_->contains(id)) {
+        return (*contacts_)[id];
+    }
+    return 0;
+}
+

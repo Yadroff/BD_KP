@@ -20,7 +20,9 @@ add_executable(Server main.cpp
         User.cpp User.h
         commands/Command.h
         commands/CommandReplyKey.h commands/CommandReplyKey.cpp
-        commands/CommandLogin.cpp commands/CommandLogin.h commands/CommandRegist.cpp commands/CommandRegist.h commands/CommandUpdateOnline.cpp commands/CommandUpdateOnline.h)
+        commands/CommandLogin.cpp commands/CommandLogin.h
+        commands/CommandRegist.cpp commands/CommandRegist.h
+        )
 target_link_libraries(Server
         Qt::Core
         Qt::Sql

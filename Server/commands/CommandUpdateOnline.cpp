@@ -13,7 +13,7 @@ CommandUpdateOnline::CommandUpdateOnline(QSharedPointer<User> &user, QString nic
     QByteArray data;
     if (!file.open(QIODevice::ReadOnly)) {
         std::cout << QTime::currentTime().toString().toStdString()
-                  << " COMMAND LOGIN:ERROR: CAN NOT OPEN FILE WITH QUERY" << std::endl;
+                  << " COMMAND UPDATE: ERROR: CAN NOT OPEN FILE WITH QUERY" << std::endl;
         return;
     }
     data = file.readAll();
@@ -23,7 +23,7 @@ CommandUpdateOnline::CommandUpdateOnline(QSharedPointer<User> &user, QString nic
 QJsonDocument CommandUpdateOnline::exec() {
     QJsonDocument doc;
     QJsonObject obj;
-    obj["Command"] = COMMAND_REGIST;
+    obj["Command"] = COMMAND_UPDATE_ONLINE;
     QSqlQuery qry;
     bool ok = qry.prepare(query_);
     if (!ok) {

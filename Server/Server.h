@@ -35,7 +35,7 @@ private:
     QSharedPointer<Sender> senderBroadcast_;
     const unsigned short SERVER_PORT = 7777;
 
-    QSharedPointer<Command> parse(const QJsonDocument &doc, QSharedPointer<User> &user);
+    QJsonDocument parse(const QJsonDocument &doc, QSharedPointer<User> &user);
 
 private slots:
 

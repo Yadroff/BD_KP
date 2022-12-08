@@ -1,6 +1,8 @@
 #include <iostream>
 #include "SenderReceiver.h"
 
+#include <QThread>
+
 SenderReceiver::SenderReceiver(QSharedPointer<CryptographAlice> &crypto, const QString &ip, const long long &keyToBob)
         : socket_(new QTcpSocket(this)), crypto_(crypto) {
     socket_->connectToHost(ip, TCP_SERVER_PORT);
@@ -36,7 +38,7 @@ void SenderReceiver::readData() {
                   << parser.errorString().toStdString() << std::endl;
         return;
     }
-    std::cout << QTime::currentTime().toString().toStdString() << "SENDER_RECEIVER: MESSAGE_FROM SERVER\n"
+    std::cout << QTime::currentTime().toString().toStdString() << " SENDER_RECEIVER: MESSAGE_FROM SERVER\n"
               << QString(json.toJson(QJsonDocument::Indented)).toStdString() << std::endl;
     parse(json);
 }
@@ -46,6 +48,12 @@ void SenderReceiver::parse(const QJsonDocument &doc) {
     QString command = obj["Command"].toString();
     if (command == COMMAND_SEND_KEY) {
         crypto_->setKeyFromBob(obj["Key"].toInteger());
-        socket_->write(crypto_->encode(QString("Hello, world!").toUtf8()));
+        QJsonDocument doc;
+        QJsonObject obj;
+        obj["Command"] = COMMAND_LOGIN;
+        obj["Login"] = "Yadroff";
+        obj["Password"] = 0;
+        doc.setObject(obj);
+        socket_->write(crypto_->encode(doc.toJson(QJsonDocument::Indented)));
     }
 }

@@ -95,8 +95,7 @@ void Server::readData() {
                               << " SERVER: ERROR: UNKNOWN COMMAND FROM USER " << _client->socketDescriptor()
                               << std::endl;
                 }*/
-                auto command = parse(doc, _user);
-                ans = command->exec();
+                ans = parse(doc, _user);
                 QByteArray res = ans.toJson(QJsonDocument::Indented);
                 std::cout << QTime::currentTime().toString().toStdString() << " SERVER: REPLY\n" << res.toStdString()
                           << std::endl;
@@ -122,23 +121,28 @@ void Server::disconnectUser() {
     std::cout << QTime::currentTime().toString().toStdString() << " SERVER: OPERATION DISCONNECT " << _id << std::endl;
 }
 
-QSharedPointer<Command> Server::parse(const QJsonDocument &doc, QSharedPointer<User> &user) {
+QJsonDocument Server::parse(const QJsonDocument &doc, QSharedPointer<User> &user) {
     auto obj = doc.object();
     auto command = obj["Command"].toString();
-    QSharedPointer<Command> res(nullptr);
+    QJsonDocument res;
     if (command == COMMAND_SEND_KEY) {
+        CommandReplyKey com(user, obj["Key"].toInteger());
+        res = com.exec();
 //        CommandReplyKey com(user, obj["Key"].toInteger());
-        res = QSharedPointer<Command>(new CommandReplyKey(user, obj["Key"].toInteger()));
     } else if (command == COMMAND_LOGIN) {
+        CommandLogin com(user, obj["Login"].toString(), obj["Password"].toInteger());
+        res = com.exec();
 //        CommandLogin com();
-        res = QSharedPointer<Command>(new CommandLogin(user, obj["Login"].toString(), obj["Password"].toInteger()));
+//        res = QSharedPointer<Command>(new CommandLogin(user, obj["Login"].toString(), obj["Password"].toInteger()));
     } else if (command == COMMAND_REGIST) {
-        res = QSharedPointer<Command>(
-                new CommandRegist(user, obj["Login"].toString(), obj["Name"].toString(), obj["Surname"].toString(),
-                                  obj["Password"].toInteger()));
+        CommandRegist com(user, obj["Login"].toString(), obj["Name"].toString(), obj["Surname"].toString(),
+                          obj["Password"].toInteger());
+        res = com.exec();
     } else {
         std::cout << QTime::currentTime().toString().toStdString()
                   << " SERVER: ERROR: UNKNOWN COMMAND FROM USER" << std::endl;
+        obj["Result"] = "ERROR: UNKNOWN COMMAND";
+        res.setObject(obj);
     }
     return res;
 }

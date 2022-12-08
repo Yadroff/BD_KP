@@ -11,12 +11,12 @@ CommandRegist::CommandRegist(QSharedPointer<User> &user, QString nick, QString n
     QByteArray data;
     if (!file.open(QIODevice::ReadOnly)) {
         std::cout << QTime::currentTime().toString().toStdString()
-                  << " COMMAND LOGIN:ERROR: CAN NOT OPEN FILE WITH QUERY" << std::endl;
+                  << " COMMAND REGIST: ERROR: CAN NOT OPEN FILE WITH QUERY" << std::endl;
         return;
     }
     data = file.readAll();
     query_ = QString(data);
-//    std::cout << query_.toStdString() << std::endl;
+//    std::cout << queryString_.toStdString() << std::endl;
 }
 
 QJsonDocument CommandRegist::exec() {

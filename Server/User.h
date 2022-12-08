@@ -2,6 +2,8 @@
 #define SERVER_USER_H
 
 #include <QObject>
+#include <QMap>
+#include <QSharedPointer>
 
 #include "Cryptograph.h"
 
@@ -22,15 +24,22 @@ public:
 
     [[nodiscard]] long long getKeyToAlice() const;
 
-    unsigned int getUserIdInDataBase() const;
+    [[nodiscard]] unsigned int getUserIdInDataBase() const;
 
     void setUserIdInDataBase(unsigned int userIdInDataBase);
+
+    void addContact(const unsigned long long &id, const QString &nick);
+
+    unsigned long long getIDContact(const QString &id);
+
+    QSharedPointer<QMap<QString, unsigned long long int>> &getContacts();
 
 private:
     bool hasSessionKey_;
     CryptographBob crypto_;
     QString userName_;
     unsigned int UserIDInDataBase_ = 0;
+    QSharedPointer<QMap<QString, unsigned long long>> contacts_;
 };
 
 

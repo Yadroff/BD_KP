@@ -3,7 +3,7 @@ WITH temp AS (SELECT FIRSTID, SecondID
                        INNER JOIN Users ON ID = FirstID
               WHERE NickName = :nickname)
 
-SELECT NickName
+SELECT NickName, ID
 FROM temp,
      Users
 WHERE ID = SecondID

@@ -48,7 +48,7 @@ QByteArray CryptographAlice::encode(const QByteArray &arr) const {
 //    std::cout << key << std::endl;
     auto *array = new long long[res.size() / _long_size];
     memcpy(array, res.data(), _long_size);
-    for (int i = 0; i < res.size(); ++i) {
+    for (int i = 0; i < res.size() / _long_size; ++i) {
         array[i] = array[i] ^ key;
     }
     memcpy(res.data(), array, _long_size);

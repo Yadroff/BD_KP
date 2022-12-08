@@ -18,7 +18,17 @@ private:
     QSharedPointer<User> user_;
     QString login_;
     unsigned long long password_;
-    QString query_;
+    QJsonDocument res_;
+
+    bool login();
+
+    bool updateOnline();
+
+    bool unreadMessages();
+
+    bool listAdmin();
+
+    bool contacts();
 };
 
 
