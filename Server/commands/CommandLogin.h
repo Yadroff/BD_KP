@@ -26,8 +26,6 @@ private:
 
     bool unreadMessages();
 
-    bool listAdmin();
-
     bool contacts();
 };
 

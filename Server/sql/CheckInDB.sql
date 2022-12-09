@@ -1,4 +1,4 @@
 SELECT *
 FROM Users
 WHERE NickName = :nickname
-  AND Password = :password_
+  AND Password = :password

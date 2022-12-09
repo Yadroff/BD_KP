@@ -35,8 +35,11 @@ private slots:
 
     void readData();
 
+    void sendDisconnect();
+
 signals:
 
+    void serverDisconnect();
 };
 
 

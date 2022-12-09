@@ -16,6 +16,7 @@ SenderReceiver::SenderReceiver(QSharedPointer<CryptographAlice> &crypto, const Q
     auto arr = doc.toJson(QJsonDocument::Indented);
     std::cout << QTime::currentTime().toString().toStdString() << " SEND: " << arr.toStdString() << std::endl;
     socket_->write(arr);
+    connect(socket_.get(), SIGNAL(disconnected()), this, SLOT(sendDisconnect()));
 }
 
 SenderReceiver::~SenderReceiver() {
@@ -56,4 +57,8 @@ void SenderReceiver::parse(const QJsonDocument &doc) {
         doc.setObject(obj);
         socket_->write(crypto_->encode(doc.toJson(QJsonDocument::Indented)));
     }
+}
+
+void SenderReceiver::sendDisconnect() {
+    emit serverDisconnect();
 }

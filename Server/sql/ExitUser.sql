@@ -1,4 +1,4 @@
 UPDATE Users
-SET Last_seen = datetime('now'),
+SET LastSeen = datetime('now'),
     Online      = 0
 WHERE NickName = :nickname

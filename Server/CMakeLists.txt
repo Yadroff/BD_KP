@@ -22,7 +22,7 @@ add_executable(Server main.cpp
         commands/CommandReplyKey.h commands/CommandReplyKey.cpp
         commands/CommandLogin.cpp commands/CommandLogin.h
         commands/CommandRegist.cpp commands/CommandRegist.h
-        commands/CommandExit.cpp commands/CommandExit.h)
+        commands/CommandExit.cpp commands/CommandExit.h commands/CommandReadMessages.cpp commands/CommandReadMessages.h)
 target_link_libraries(Server
         Qt::Core
         Qt::Sql

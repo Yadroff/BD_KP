@@ -3,7 +3,7 @@
 #include <utility>
 
 CommandExit::CommandExit(QString nick) : nick_(std::move(nick)) {
-    updateQuery(PATH_TO_EXIT);
+    updateQueryString(PATH_TO_EXIT);
     start_ = QTime::currentTime();
 }
 

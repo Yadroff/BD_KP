@@ -28,7 +28,7 @@ public:
 
     void setUserIdInDataBase(unsigned int userIdInDataBase);
 
-    void addContact(const unsigned long long &id, const QString &nick);
+    void addChannel(const unsigned long long &id, const QString &nick);
 
     unsigned long long getIDContact(const QString &id);
 

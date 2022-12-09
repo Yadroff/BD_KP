@@ -78,7 +78,7 @@ void User::setUserIdInDataBase(unsigned int userIdInDataBase) {
     UserIDInDataBase_ = userIdInDataBase;
 }
 
-void User::addContact(const unsigned long long int &id, const QString &nick) {
+void User::addChannel(const unsigned long long int &id, const QString &nick) {
     auto map = contacts_.get();
     (*map)[nick] = id;
 }

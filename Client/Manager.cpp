@@ -37,4 +37,5 @@ void Manager::connectToServer(const QString &servAddress) {
     auto keyToBob = crypto_->getKeyToBob();
     sender_ = QSharedPointer<SenderReceiver>(new SenderReceiver(crypto_, ip, keyToBob));
     sender_->moveToThread(thread_.get());
+    emit(sender_.get(), SIGNAL(serverDisconnected()), this, SLOT(deleteLater()));
 }
