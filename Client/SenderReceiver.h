@@ -1,15 +1,9 @@
-//
-// Created by yadroff on 04.12.22.
-//
-
 #ifndef CLIENT_SENDERRECEIVER_H
 #define CLIENT_SENDERRECEIVER_H
 
 #include <QObject>
 #include <QTcpSocket>
-#include <QJsonDocument>
-#include <QJsonObject>
-#include <QSharedPointer>
+
 
 #include "CommonHeader.h"
 #include "CryptographAlice.h"
@@ -29,7 +23,15 @@ private:
     QSharedPointer<QTcpSocket> socket_;
     QSharedPointer<CryptographAlice> crypto_;
 
-    void parse(const QJsonDocument &);
+    void parseServerAnswer(const QJsonDocument &doc);
+
+    QJsonDocument parseClientSend(const QString &str);
+
+    static const int COMMAND_LOGIN_SIZE = 3;
+    static const int COMMAND_REGIST_SIZE = 5;
+    static const int COMMAND_GET_MESSAGES_SIZE = 3;
+    static const int COMMAND_SEND_MESSAGE_SIZE = 4;
+    static const int COMMAND_SEARCH_SIZE = 2;
 
 private slots:
 
@@ -40,6 +42,8 @@ private slots:
 signals:
 
     void serverDisconnect();
+
+    void serverMessage(const QJsonDocument &doc);
 };
 
 

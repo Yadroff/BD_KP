@@ -1,10 +1,6 @@
 #ifndef CONNECTOR_H
 #define CONNECTOR_H
 
-#include <QObject>
-#include <QUdpSocket>
-#include <QTime>
-
 #include "CommonHeader.h"
 
 class Connector : public QObject
@@ -19,8 +15,9 @@ private:
     unsigned short serverPort_;
     QUdpSocket *socket_;
     bool runFlag_;
-    QTime start_;
+//    QTime start_;
     static const int LOGIN_TIME = 10000;
+//    bool connect_;
 private slots:
     void readData();
 public slots:

@@ -21,6 +21,11 @@ Server::Server() {
     database_.setDatabaseName(PATH_TO_DATABASE);
     if (database_.open()) {
         std::cout << QTime::currentTime().toString().toStdString() << " DATABASE: OPEN" << std::endl;
+        CommandInitDB com;
+        if (com.exec().object()["Result"] != "SUCCESS") {
+            std::cout << QTime::currentTime().toString().toStdString() << " DATABASE: ERROR: CAN NOT CREATE TEMP TABLE"
+                      << std::endl;
+        }
     } else {
         std::cout << QTime::currentTime().toString().toStdString() << " DATABASE: ERROR: CAN NOT OPEN" << std::endl;
     }
@@ -41,7 +46,7 @@ void Server::newUser() {
         while (server_->hasPendingConnections()) {
             std::cout << QTime::currentTime().toString().toStdString() << " SERVER: OPERATION: NEW USER" << std::endl;
             auto _client = server_->nextPendingConnection();
-            clients_[_client] = QSharedPointer<User>(new User());
+            clients_[_client] = QSharedPointer<User>(new User(_client));
             connect(_client, SIGNAL(readyRead()), this, SLOT(readData()));
             connect(_client, SIGNAL(disconnected()), this, SLOT(disconnectUser()));
         }
@@ -74,7 +79,8 @@ void Server::readData() {
         QByteArray _readBuff = _client->readAll();
         auto _user = clients_[_client];
         _readBuff = _user->decode(_readBuff);
-        std::cout << _readBuff.toStdString() << std::endl;
+        std::cout << QTime::currentTime().toString().toStdString() << " SERVER: GET MESSAGE\n"
+                  << _readBuff.toStdString() << std::endl;
         QJsonDocument doc;
         QJsonParseError parser;
         doc = QJsonDocument::fromJson(_readBuff, &parser);
@@ -84,19 +90,6 @@ void Server::readData() {
                       << parser.errorString().toStdString() << std::endl;
         }
         QJsonDocument ans;
-        /*auto obj = doc.object();
-        auto command = obj["Command"].toString();
-        if (command == COMMAND_SEND_KEY) {
-            CommandReplyKey com(_user, obj["Key"].toInteger());
-            ans = com.exec();
-        } else if (command == COMMAND_LOGIN) {
-            CommandLogin com(_user, obj["Login"].toString(), obj["Password"].toInteger());
-            ans = com.exec();
-        } else {
-            std::cout << QTime::currentTime().toString().toStdString()
-                      << " SERVER: ERROR: UNKNOWN COMMAND FROM USER " << _client->socketDescriptor()
-                      << std::endl;
-        }*/
         ans = parse(doc, _user);
         QByteArray res = ans.toJson(QJsonDocument::Indented);
         std::cout << QTime::currentTime().toString().toStdString() << " SERVER: REPLY\n" << res.toStdString()
@@ -128,20 +121,36 @@ QJsonDocument Server::parse(const QJsonDocument &doc, QSharedPointer<User> &user
     if (command == COMMAND_SEND_KEY) {
         CommandReplyKey com(user, obj["Key"].toInteger());
         res = com.exec();
-//        CommandReplyKey com(user, obj["Key"].toInteger());
     } else if (command == COMMAND_LOGIN) {
         QString login = obj["Login"].toString();
-        CommandLogin com(user, login, obj["Password"].toInteger());
+        CommandLogin com(user, login, obj["Password"].toString());
         res = com.exec();
         if (res.object()["Result"].toString() == "SUCCESS") {
             user->setUserName(login);
             users_.insert(login, user);
+            test(user);
         }
-//        CommandLogin com();
-//        res = QSharedPointer<Command>(new CommandLogin(user, obj["Login"].toString(), obj["Password"].toInteger()));
     } else if (command == COMMAND_REGIST) {
         CommandRegist com(user, obj["Login"].toString(), obj["Name"].toString(), obj["Surname"].toString(),
-                          obj["Password"].toInteger());
+                          obj["Password"].toString());
+        res = com.exec();
+    } else if (command == COMMAND_SEND_MESSAGE) {
+        QString channelName = obj["Channel"].toString();
+        QString sender = user->getUserName();
+        CommandSendMessage com(user, channelName, obj["Message"].toString(),
+                               QDateTime::fromString(obj["Date"].toString(), DATE_FORMAT));
+
+        res = com.exec();
+        if (res.object()["Result"].toString() == "SUCCESS") {
+            //TODO: добавить отправку уведомления о сообщении другим пользователям канала в сети
+            CommandGetUsersInChannel getOnlineUsers(channelName);
+            NotifyNewMessage notifyNewMessage(users_, getOnlineUsers.exec(), channelName, sender);
+        }
+    } else if (command == COMMAND_READ_MESSAGES) {
+        CommandReadMessages com(obj["Channel"].toString(), QDateTime::fromString(obj["Date"].toString(), DATE_FORMAT));
+        res = com.exec();
+    } else if (command == COMMAND_SEARCH) {
+        CommandSearch com(user, obj["Name"].toString());
         res = com.exec();
     } else {
         std::cout << QTime::currentTime().toString().toStdString()
@@ -150,4 +159,11 @@ QJsonDocument Server::parse(const QJsonDocument &doc, QSharedPointer<User> &user
         res.setObject(obj);
     }
     return res;
+}
+
+void Server::test(QSharedPointer<User> &user) {
+    /*   if (user->getUserName() == "Yadroff") {
+           CommandCreateDialog com(user, "Kuli4OK");
+           std::cout << com.exec().toJson().toStdString() << std::endl;
+       }*/
 }

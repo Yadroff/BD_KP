@@ -6,7 +6,7 @@
 class CommandRegist : public Command {
 public:
     CommandRegist(QSharedPointer<User> &user, QString nick, QString name, QString surname,
-                  const unsigned long long &password);
+                  QString password);
 
     QJsonDocument exec() override;
 
@@ -15,7 +15,7 @@ private:
     QString nickname_;
     QString name_;
     QString surname_;
-    unsigned long long password_;
+    QString password_;
     QString query_;
 };
 

@@ -16,6 +16,7 @@ SenderReceiver::SenderReceiver(QSharedPointer<CryptographAlice> &crypto, const Q
     auto arr = doc.toJson(QJsonDocument::Indented);
     std::cout << QTime::currentTime().toString().toStdString() << " SEND: " << arr.toStdString() << std::endl;
     socket_->write(arr);
+//    socket_->waitForReadyRead();
     connect(socket_.get(), SIGNAL(disconnected()), this, SLOT(sendDisconnect()));
 }
 
@@ -27,6 +28,8 @@ SenderReceiver::~SenderReceiver() {
 }
 
 void SenderReceiver::send(const QString &str) {
+    QJsonDocument doc = parseClientSend(str);
+    socket_->write(crypto_->encode(doc.toJson(QJsonDocument::Indented)));
 }
 
 void SenderReceiver::readData() {
@@ -37,28 +40,90 @@ void SenderReceiver::readData() {
     if (parser.error != QJsonParseError::NoError) {
         std::cout << QTime::currentTime().toString().toStdString() << " SENDER_RECEIVER: ERROR: CAN_NOT_PARSE_TO_JSON\n"
                   << parser.errorString().toStdString() << std::endl;
+        std::cout << arr.toStdString() << std::endl;
         return;
     }
     std::cout << QTime::currentTime().toString().toStdString() << " SENDER_RECEIVER: MESSAGE_FROM SERVER\n"
               << QString(json.toJson(QJsonDocument::Indented)).toStdString() << std::endl;
-    parse(json);
+    parseServerAnswer(json);
 }
 
-void SenderReceiver::parse(const QJsonDocument &doc) {
+void SenderReceiver::parseServerAnswer(const QJsonDocument &doc) {
     QJsonObject obj = doc.object();
     QString command = obj["Command"].toString();
     if (command == COMMAND_SEND_KEY) {
         crypto_->setKeyFromBob(obj["Key"].toInteger());
-        QJsonDocument doc;
-        QJsonObject obj;
-        obj["Command"] = COMMAND_LOGIN;
-        obj["Login"] = "Yadroff";
-        obj["Password"] = 0;
-        doc.setObject(obj);
-        socket_->write(crypto_->encode(doc.toJson(QJsonDocument::Indented)));
+    } else {
+        emit serverMessage(doc);
     }
 }
 
 void SenderReceiver::sendDisconnect() {
     emit serverDisconnect();
+}
+
+QJsonDocument SenderReceiver::parseClientSend(const QString &str) {
+    QJsonDocument doc;
+    QJsonObject obj;
+    auto arguments = str.split(SEPARATOR);
+    QString command = arguments[0];
+    obj["Command"] = command;
+    doc.setObject(obj);
+    if (command == COMMAND_LOGIN) {
+        if (arguments.size() != COMMAND_LOGIN_SIZE) {
+            std::cout << QTime::currentTime().toString().toStdString() << " ERROR: WRONG ARGUMENTS TO COMMAND "
+                      << command.toStdString() << std::endl;
+            return doc;
+        }
+        obj["Login"] = arguments[1];
+        obj["Password"] = arguments[2];
+        doc.setObject(obj);
+        return doc;
+    } else if (command == COMMAND_REGIST) {
+        if (arguments.size() != COMMAND_REGIST_SIZE) {
+            std::cout << QTime::currentTime().toString().toStdString() << " ERROR: WRONG ARGUMENTS TO COMMAND "
+                      << command.toStdString() << std::endl;
+            return doc;
+        }
+        obj["Login"] = arguments[1];
+        obj["Name"] = arguments[2];
+        obj["Surname"] = arguments[3];
+        obj["Password"] = arguments[4];
+        doc.setObject(obj);
+        return doc;
+    } else if (command == COMMAND_SEND_MESSAGE) {
+        if (arguments.size() != COMMAND_SEND_MESSAGE_SIZE) {
+            std::cout << QTime::currentTime().toString().toStdString() << " ERROR: WRONG ARGUMENTS TO COMMAND "
+                      << command.toStdString() << std::endl;
+            return doc;
+        }
+        obj["Channel"] = arguments[1];
+        obj["Message"] = arguments[2];
+        obj["Date"] = arguments[3];
+        doc.setObject(obj);
+        return doc;
+    } else if (command == COMMAND_READ_MESSAGES) {
+        if (arguments.size() != COMMAND_GET_MESSAGES_SIZE) {
+            std::cout << QTime::currentTime().toString().toStdString() << " ERROR: WRONG ARGUMENTS TO COMMAND "
+                      << command.toStdString() << std::endl;
+            return doc;
+        }
+        obj["Channel"] = arguments[1];
+        obj["Date"] = arguments[2];
+        doc.setObject(obj);
+        return doc;
+    } else if (command == COMMAND_SEARCH) {
+        if (arguments.size() != COMMAND_SEARCH_SIZE) {
+            std::cout << QTime::currentTime().toString().toStdString() << " ERROR: WRONG ARGUMENTS TO COMMAND "
+                      << command.toStdString() << std::endl;
+            return doc;
+        }
+        obj["Name"] = arguments[1];
+        doc.setObject(obj);
+        return doc;
+    } else {
+        std::cout << QTime::currentTime().toString().toStdString() << " ERROR: WRONG COMMAND: "
+                  << command.toStdString() << std::endl;
+        return doc;
+    }
 }

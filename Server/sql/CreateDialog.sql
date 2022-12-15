@@ -1,6 +1,6 @@
 -- создаем приватный канал
-INSERT INTO Channels(ChannelName, PrivateFlag, CreateDate, LastMessage)
-VALUES (:name, 1, datetime('now'), datetime('now'));
+INSERT INTO Channels(ChannelName, PrivateFlag, CreateDate, LastMessageDate, CreatorID, TypeChannel)
+VALUES (:name, 1, datetime('now'), datetime('now'), :first, 0);
 -- добавляем первого дэбила в чат
 INSERT INTO ChannelUsers(ChannelID, UserID, CreateDate, Rights)
 SELECT ChannelID, :first, CreateDate, 4

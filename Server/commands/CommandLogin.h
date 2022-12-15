@@ -1,23 +1,18 @@
-//
-// Created by yadroff on 07.12.22.
-//
-
 #ifndef SERVER_COMMANDLOGIN_H
 #define SERVER_COMMANDLOGIN_H
 
 #include "Command.h"
-#include <QFile>
 
 class CommandLogin : public Command {
 public:
-    CommandLogin(QSharedPointer<User> &user, QString login, const unsigned long long &password);
+    CommandLogin(QSharedPointer<User> &user, QString login, QString password);
 
     QJsonDocument exec() override;
 
 private:
     QSharedPointer<User> user_;
     QString login_;
-    unsigned long long password_;
+    QString password_;
     QJsonDocument res_;
 
     bool login();
@@ -26,7 +21,9 @@ private:
 
     bool unreadMessages();
 
-    bool contacts();
+    bool channels();
+
+    bool addInTempTable();
 };
 
 

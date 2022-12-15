@@ -4,9 +4,9 @@
 #include <iostream>
 
 CommandRegist::CommandRegist(QSharedPointer<User> &user, QString nick, QString name,
-                             QString surname, const unsigned long long int &password)
+                             QString surname, QString password)
         : user_(user), nickname_(std::move(nick)), name_(std::move(name)), surname_(std::move(surname)),
-          password_(password) {
+          password_(std::move(password)) {
     QFile file(PATH_TO_REGIST);
     QByteArray data;
     if (!file.open(QIODevice::ReadOnly)) {
@@ -35,9 +35,11 @@ QJsonDocument CommandRegist::exec() {
     qry.bindValue(":surname", surname_);
     qry.bindValue(":password", password_);
     if (qry.exec()) {
-        obj["Result"] = "Success";
+        obj["Result"] = "SUCCESS";
+        user_->setUserName(nickname_);
     } else {
-        obj["Result"] = qry.lastError().text();
+        std::cout << " COMMAND REGIST: ERROR\n" << qry.lastError().text().toStdString() << std::endl;
+        obj["Result"] = "Fail";
     }
     doc.setObject(obj);
     return doc;

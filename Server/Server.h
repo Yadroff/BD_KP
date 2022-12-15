@@ -9,15 +9,7 @@
 
 #include <iostream>
 
-#include "Sender.h"
-#include "User.h"
-
-#include "commands/Command.h"
-#include "commands/CommandReplyKey.h"
-#include "commands/CommandLogin.h"
-#include "commands/CommandRegist.h"
-#include "commands/CommandExit.h"
-
+#include "IncludesToServer.h"
 
 class Server : public QObject {
 Q_OBJECT
@@ -29,7 +21,7 @@ public:
 private:
     QTcpServer *server_;
     bool isListen_ = false; // статус
-    QMap<QTcpSocket *, QSharedPointer<User> > clients_;// пользователи
+    QHash<QTcpSocket *, QSharedPointer<User> > clients_;// пользователи
     QSqlDatabase database_;
     QSharedPointer<QThread> threadBroadcast_;
     QSharedPointer<Sender> senderBroadcast_;
@@ -37,6 +29,8 @@ private:
     QHash<QString, QSharedPointer<User>> users_;
 
     QJsonDocument parse(const QJsonDocument &doc, QSharedPointer<User> &user);
+
+    void test(QSharedPointer<User> &user);
 
 private slots:
 

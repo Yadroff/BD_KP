@@ -12,6 +12,7 @@ find_package(Qt6 COMPONENTS
         Gui
         Widgets
         Network
+        Multimedia
         REQUIRED)
 
 add_executable(Client
@@ -19,13 +20,15 @@ add_executable(Client
         CommonHeader.h
         Connector.h Connector.cpp
         CryptographAlice.cpp CryptographAlice.h
-        Manager.cpp Manager.h
         SenderReceiver.cpp SenderReceiver.h
-        )
+        window.h window.cpp window.ui
+        res.qrc
+        Channel.cpp Channel.h)
 target_link_libraries(Client
         Qt::Core
         Qt::Gui
         Qt::Widgets
         Qt::Network
+        Qt::Multimedia
         )
 

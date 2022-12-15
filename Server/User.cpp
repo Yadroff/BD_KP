@@ -24,8 +24,9 @@ QByteArray User::encode(const QByteArray &arr) {
     return res;
 }
 
-User::User() : hasSessionKey_(false) {
-    contacts_ = QSharedPointer<QMap<QString, unsigned long long>>(new QMap<QString, unsigned long long>);
+User::User(QTcpSocket *socket) : hasSessionKey_(false), socket_(socket) {
+    contacts_ = QSharedPointer<QMap<QString, QPair<unsigned long long, int>>>(
+            new QMap<QString, QPair<unsigned long long, int>>);
 }
 
 void User::setKeyFromAlice(const long long &key) {
@@ -78,20 +79,20 @@ void User::setUserIdInDataBase(unsigned int userIdInDataBase) {
     UserIDInDataBase_ = userIdInDataBase;
 }
 
-void User::addChannel(const unsigned long long int &id, const QString &nick) {
+void User::addChannel(const QString &channel, const unsigned long long &id, const int &roots) {
     auto map = contacts_.get();
-    (*map)[nick] = id;
+    (*map)[channel] = QPair<unsigned long long, int>(id, roots);
 }
 
-QSharedPointer<QMap<QString, unsigned long long int>> &User::getContacts() {
+QSharedPointer<QMap<QString, QPair<unsigned long long, int>>> &User::getContacts() {
     return contacts_;
 }
 
-unsigned long long User::getIDContact(const QString &id) {
-    if (contacts_->contains(id)) {
-        return (*contacts_)[id];
+QPair<unsigned long long, int> User::getIDRootsFromChannel(const QString &channelName) {
+    if (contacts_->contains(channelName)) {
+        return (*contacts_)[channelName];
     }
-    return 0;
+    return {0, 0};
 }
 
 const QString &User::getUserName() const {
@@ -100,5 +101,9 @@ const QString &User::getUserName() const {
 
 void User::setUserName(const QString &userName) {
     userName_ = userName;
+}
+
+void User::writeJSON(const QJsonDocument &doc) {
+    socket_->write(encode(doc.toJson(QJsonDocument::Indented)));
 }
 

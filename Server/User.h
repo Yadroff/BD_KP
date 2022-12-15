@@ -4,13 +4,15 @@
 #include <QObject>
 #include <QMap>
 #include <QSharedPointer>
+#include <QTcpSocket>
+#include <QJsonDocument>
 
 #include "Cryptograph.h"
 
 class User : public QObject {
 Q_OBJECT
 public:
-    User();
+    User(QTcpSocket *socket);
 
     void setKeyFromAlice(const long long &key);
 
@@ -28,22 +30,25 @@ public:
 
     void setUserIdInDataBase(unsigned int userIdInDataBase);
 
-    void addChannel(const unsigned long long &id, const QString &nick);
+    void addChannel(const QString &channel, const unsigned long long &id, const int &roots);
 
-    unsigned long long getIDContact(const QString &id);
+    QPair<unsigned long long, int> getIDRootsFromChannel(const QString &channelName);
 
-    QSharedPointer<QMap<QString, unsigned long long int>> &getContacts();
+    QSharedPointer<QMap<QString, QPair<unsigned long long int, int>>> &getContacts();
 
     [[nodiscard]] const QString &getUserName() const;
 
     void setUserName(const QString &userName);
+
+    void writeJSON(const QJsonDocument &doc);
 
 private:
     bool hasSessionKey_;
     CryptographBob crypto_;
     QString userName_;
     unsigned int UserIDInDataBase_ = 0;
-    QSharedPointer<QMap<QString, unsigned long long>> contacts_;
+    QSharedPointer<QMap<QString, QPair<unsigned long long, int>>> contacts_;
+    QTcpSocket *socket_;
 };
 
 
