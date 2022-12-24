@@ -31,18 +31,32 @@ void Channel::cache() {
     if (messages_.isEmpty()) {
         return;
     }
-    if (!cacheFile_.open(QIODevice::WriteOnly | QIODevice::Append)) {
+    if (!cacheFile_.open(QIODevice::ReadWrite)) {
         std::cout << QTime::currentTime().toString().toStdString() << " CHANNEL " << channelName_.toStdString()
                   << " CAN NOT OPEN CACHE FILE: " << cacheFile_.errorString().toStdString() << std::endl;
         return;
     }
-    QJsonDocument doc;
-    QJsonArray messages;
+    QJsonParseError err;
+    QByteArray _cache = cacheFile_.readAll();
+    cacheFile_.close();
+    QJsonDocument doc = QJsonDocument::fromJson(_cache, &err);
+    if (err.error != QJsonParseError::NoError) {
+        std::cout << QTime::currentTime().toString().toStdString() << " " << err.errorString().toStdString()
+                  << std::endl;
+        std::cout << _cache.toStdString() << std::endl;
+        cacheFile_.close();
+    }
+    QJsonArray messages = doc.array();
     for (const auto &mess: messages_) {
         messages.append(mess->toJson());
 //        lastCashedMessage_ = mess->getId();
     }
     doc.setArray(messages);
+    if (!cacheFile_.open(QIODevice::Truncate | QIODevice::WriteOnly)) {
+        std::cout << QTime::currentTime().toString().toStdString() << " CHANNEL " << channelName_.toStdString()
+                  << " CAN NOT OPEN CACHE FILE: " << cacheFile_.errorString().toStdString() << std::endl;
+        return;
+    }
     cacheFile_.write(doc.toJson());
     messages_.clear();
     cacheFile_.close();
@@ -65,10 +79,12 @@ QJsonDocument Channel::getMessagesFromCache() {
     }
     cacheFile_.seek(0);
     QJsonParseError err;
-    QJsonDocument doc = QJsonDocument::fromJson(cacheFile_.readAll(), &err);
+    QByteArray _cache = cacheFile_.readAll();
+    QJsonDocument doc = QJsonDocument::fromJson(_cache, &err);
     if (err.error != QJsonParseError::NoError) {
         std::cout << QTime::currentTime().toString().toStdString() << " " << err.errorString().toStdString()
                   << std::endl;
+        std::cout << _cache.toStdString() << std::endl;
         cacheFile_.close();
         return {};
     }
@@ -79,6 +95,8 @@ QJsonDocument Channel::getMessagesFromCache() {
         return v1.toObject()["Send"].toString() < v2.toObject()["Send"].toString();
     });
     doc.setArray(messages);
+    std::cout << QTime::currentTime().toString().toStdString() << " MESSAGES FROM CACHE\n" << doc.toJson().toStdString()
+              << std::endl;
     return doc;
 }
 

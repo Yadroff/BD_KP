@@ -234,7 +234,9 @@ void Window::parseServerMessage(const QJsonDocument &doc) {
         QString sender = obj["Sender"].toString();
         QDateTime edit;
         if (obj.contains("Edit")) {
-            edit = QDateTime::fromString(obj["Edit"].toString(), DATE_FORMAT).toLocalTime();
+            edit = QDateTime::fromString(obj["Edit"].toString(), DATE_FORMAT);
+            edit.setTimeSpec(Qt::UTC);
+            edit = edit.toLocalTime();
         }
         int id = obj["MessageID"].toInt();
         auto mess = new Message(id, channel, sender, content, date);
