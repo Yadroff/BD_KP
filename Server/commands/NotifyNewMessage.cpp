@@ -2,28 +2,28 @@
 
 #include <utility>
 
-NotifyNewMessage::NotifyNewMessage(QHash<QString, QSharedPointer<User>> &users, QJsonDocument doc, QString channel,
-                                   QString sender) :
-        users_(users), doc_(std::move(doc)), channel_(std::move(channel)), sender_(std::move(sender)) {}
+NotifyNewMessage::NotifyNewMessage(QHash<QString, QSharedPointer<User>> &users, QJsonDocument onlineUsers,
+                                   QJsonDocument message,
+                                   QString sender, QString channel, int messageID) :
+        users_(users), onlineUsers_(std::move(onlineUsers)), channel_(std::move(channel)), sender_(std::move(sender)),
+        message_(std::move(message)), messageID_(messageID) {}
 
 QJsonDocument NotifyNewMessage::exec() {
     QJsonDocument res;
     QJsonObject obj;
     obj["Command"] = COMMAND_NOTIFY_NEW_MESSAGE;
     QJsonDocument send;
-    QJsonObject objSend;
+    QJsonObject objSend = message_.object();
     objSend["Command"] = COMMAND_NOTIFY_NEW_MESSAGE;
-    objSend["Channel"] = channel_;
+    objSend["MessageID"] = messageID_;
+    objSend["Sender"] = sender_;
     send.setObject(objSend);
-    auto userNames = doc_.array();
+    auto userNames = onlineUsers_.object()["Users"].toArray();
     for (auto &&item: userNames) {
-        QJsonObject nameObject = item.toObject();
-        QString name = nameObject["Nickname"].toString();
-        if (name == sender_) {
-            continue;
-        }
+        QString name = item.toString();
         users_[name]->writeJSON(send);
     }
     obj["Result"] = "SUCCESS";
     res.setObject(obj);
+    return res;
 }

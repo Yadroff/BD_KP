@@ -29,9 +29,6 @@ QJsonDocument CommandSendMessage::exec() {
         return doc;
     }
     auto stringList = queryString_.split(";\n");
-    for (int i = 0; i < stringList.size(); ++i) {
-        std::cout << i << " ITEM\n" << stringList[i].toStdString() << std::endl;
-    }
     auto [id, roots] = user_->getIDRootsFromChannel(channel_);
     if (roots < ROOTS_ADMINISTRATOR) {
         obj["Result"] = "FAIL";
@@ -76,6 +73,7 @@ QJsonDocument CommandSendMessage::exec() {
         return doc;
     }
     obj["Result"] = "SUCCESS";
+    obj["MessageID"] = query.lastInsertId().toInt();
     doc.setObject(obj);
     return doc;
 }

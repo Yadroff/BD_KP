@@ -1,4 +1,4 @@
-SELECT  U.Nickname, DateCreate, Content
+SELECT ChannelName, U.Nickname, DateCreate, Content, DateEdit, Message.MessageID
 FROM Channels
          INNER JOIN Messages Message on Channels.ChannelID = Message.ChannelID
          INNER JOIN MessageContents Content on Message.MessageID = Content.MessageID

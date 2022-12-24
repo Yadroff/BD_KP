@@ -5,15 +5,18 @@
 
 class NotifyNewMessage : public Command {
 public:
-    NotifyNewMessage(QHash<QString, QSharedPointer<User>> &users, QJsonDocument doc, QString channel, QString sender);
+    NotifyNewMessage(QHash<QString, QSharedPointer<User>> &users, QJsonDocument onlineUsers, QJsonDocument message,
+                     QString sender, QString channel, int messageID);
 
     QJsonDocument exec() override;
 
 private:
     QString channel_;
     QHash<QString, QSharedPointer<User>> users_;
-    QJsonDocument doc_;
+    QJsonDocument onlineUsers_;
     QString sender_;
+    QJsonDocument message_;
+    int messageID_;
 };
 
 

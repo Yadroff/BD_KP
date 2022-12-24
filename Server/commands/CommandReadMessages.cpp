@@ -34,11 +34,16 @@ QJsonDocument CommandReadMessages::exec() {
         doc.setObject(obj);
         return doc;
     }
+    std::cout << dateTime_.toString(DATE_FORMAT).toStdString() << std::endl;
     QJsonArray messages;
     QJsonObject message;
     while (query.next()) {
         message["Sender"] = query.value("Nickname").toString();
         message["Date"] = query.value("DateCreate").toString();
+        message["ID"] = query.value("MessageID").toInt();
+        if (!query.value("DateEdit").isNull()) {
+            message["Edit"] = query.value("DateEdit").toString();
+        }
         std::string str = query.value("Content").toString().toStdString();
         std::string key = SECRET_KEY.toStdString();
         for (int i = 0; i < str.size(); ++i) {
@@ -49,6 +54,7 @@ QJsonDocument CommandReadMessages::exec() {
     }
     obj["Messages"] = messages;
     obj["Result"] = "SUCCESS";
+    obj["Channel"] = channelName_;
     doc.setObject(obj);
     return doc;
 }

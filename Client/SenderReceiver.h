@@ -32,6 +32,7 @@ private:
     static const int COMMAND_GET_MESSAGES_SIZE = 3;
     static const int COMMAND_SEND_MESSAGE_SIZE = 4;
     static const int COMMAND_SEARCH_SIZE = 2;
+    static const int COMMAND_CREATE_DIALOG_SIZE = 2;
 
 private slots:
 

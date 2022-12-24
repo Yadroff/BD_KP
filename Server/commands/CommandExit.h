@@ -10,7 +10,6 @@ public:
     QJsonDocument exec() override;
 
     void setNick(const QString &nick);
-
 private:
     QString nick_;
 };

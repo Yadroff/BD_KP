@@ -141,14 +141,37 @@ QJsonDocument Server::parse(const QJsonDocument &doc, QSharedPointer<User> &user
                                QDateTime::fromString(obj["Date"].toString(), DATE_FORMAT));
 
         res = com.exec();
-        if (res.object()["Result"].toString() == "SUCCESS") {
-            //TODO: добавить отправку уведомления о сообщении другим пользователям канала в сети
+        auto resObj = res.object();
+        if (resObj["Result"].toString() == "SUCCESS") {
             CommandGetUsersInChannel getOnlineUsers(channelName);
-            NotifyNewMessage notifyNewMessage(users_, getOnlineUsers.exec(), channelName, sender);
+            std::cout << "ONLINE USER FROM CHANNEL: " << channelName.toStdString() << std::endl;
+            std::cout << getOnlineUsers.exec().toJson().toStdString() << std::endl;
+            NotifyNewMessage notifyNewMessage(users_, getOnlineUsers.exec(), doc, sender, channelName,
+                                              resObj["MessageID"].toInt());
+            std::cout << notifyNewMessage.exec().toJson().toStdString() << std::endl;
+//            res = notifyNewMessage.exec();
         }
     } else if (command == COMMAND_READ_MESSAGES) {
         CommandReadMessages com(obj["Channel"].toString(), QDateTime::fromString(obj["Date"].toString(), DATE_FORMAT));
         res = com.exec();
+    } else if (command == COMMAND_CREATE_DIALOG) {
+        QString secondUser = obj["User"].toString();
+        CommandCreateDialog com(user, secondUser);
+        res = com.exec();
+        auto resObj = res.object();
+        // добавим диалог в каналы пользователей
+        if (resObj["Result"] == "SUCCESS") {
+            QString channel = resObj["Channel"].toString();
+            unsigned long long id = resObj["ID"].toInteger();
+            user->addChannel(channel, id, ROOTS_OWNER);
+            CommandAddToTempTable addFirst(user->getUserName(), channel);
+            addFirst.exec();
+            if (users_.contains(secondUser)) {
+                users_[secondUser]->addChannel(channel, id, ROOTS_OWNER);
+                CommandAddToTempTable addSecond(secondUser, channel);
+                addSecond.exec();
+            }
+        }
     } else if (command == COMMAND_SEARCH) {
         CommandSearch com(user, obj["Name"].toString());
         res = com.exec();

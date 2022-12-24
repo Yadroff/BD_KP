@@ -28,7 +28,7 @@ add_executable(Server main.cpp
         commands/CommandSendMessage.cpp commands/CommandSendMessage.h
         commands/CommandGetUsersInChannel.cpp commands/CommandGetUsersInChannel.h
         commands/CommandInitDB.cpp commands/CommandInitDB.h
-        commands/CommandCreateDialog.cpp commands/CommandCreateDialog.h commands/NotifyNewMessage.cpp commands/NotifyNewMessage.h commands/CommandSearch.cpp commands/CommandSearch.h)
+        commands/CommandCreateDialog.cpp commands/CommandCreateDialog.h commands/NotifyNewMessage.cpp commands/NotifyNewMessage.h commands/CommandSearch.cpp commands/CommandSearch.h commands/CommandAddToTempTable.cpp commands/CommandAddToTempTable.h)
 target_link_libraries(Server
         Qt::Core
         Qt::Sql

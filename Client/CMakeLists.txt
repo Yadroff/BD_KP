@@ -23,7 +23,11 @@ add_executable(Client
         SenderReceiver.cpp SenderReceiver.h
         window.h window.cpp window.ui
         res.qrc
-        Channel.cpp Channel.h)
+        ChannelItem.cpp ChannelItem.h
+        Channel.cpp Channel.h
+        Message.cpp Message.h
+        MessageLabel.cpp MessageLabel.h
+        MessageMenu.cpp MessageMenu.h)
 target_link_libraries(Client
         Qt::Core
         Qt::Gui

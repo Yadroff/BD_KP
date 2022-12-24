@@ -9,26 +9,40 @@ CommandExit::CommandExit(QString nick) : nick_(std::move(nick)) {
 
 QJsonDocument CommandExit::exec() {
     QJsonDocument res;
-    if (queryString_ == CAN_NOT_OPEN_QUERY_FILE_MESSAGE) {
-        std::cout << QTime::currentTime().toString().toStdString() << " EXIT ERROR:" << queryString_.toStdString()
-                  << std::endl;
-        return res;
-    }
     QJsonObject obj;
     obj["Command"] = COMMAND_EXIT;
     obj["Result"] = "";
-    QSqlQuery qry;
-    bool ok = qry.prepare(queryString_);
-    if (!ok) {
-        obj["Result"] = qry.lastError().text();
+    if (queryString_ == CAN_NOT_OPEN_QUERY_FILE_MESSAGE) {
+        std::cout << QTime::currentTime().toString().toStdString() << " EXIT ERROR:" << queryString_.toStdString()
+                  << std::endl;
+        obj["Result"] = CAN_NOT_OPEN_QUERY_FILE_MESSAGE;
         res.setObject(obj);
         return res;
     }
-    qry.bindValue(":nickname", nick_);
-    if (!qry.exec()) {
-        obj["Result"] = qry.lastError().text();
+    QSqlQuery qry;
+    QStringList queries = queryString_.split(";\n");
+    if (queries.size() != EXIT_QUERIES) {
+        std::cout << QTime::currentTime().toString().toStdString() << " EXIT ERROR: WRONG QUERIES SIZE" << std::endl;
+        obj["Result"] = "Server error";
         res.setObject(obj);
         return res;
+    }
+    for (int i = 0; i < EXIT_QUERIES; ++i) {
+        if (!qry.prepare(queries[i])) {
+            std::cout << QTime::currentTime().toString().toStdString() << " EXIT ERROR: "
+                      << qry.lastError().text().toStdString() << std::endl;
+            obj["Result"] = "Server error";
+            res.setObject(obj);
+            return res;
+        }
+        qry.bindValue(":nickname", nick_);
+        if (!qry.exec()) {
+            std::cout << QTime::currentTime().toString().toStdString() << " EXIT ERROR: "
+                      << qry.lastError().text().toStdString() << std::endl;
+            obj["Result"] = "Server error";
+            res.setObject(obj);
+            return res;
+        }
     }
     obj["Result"] = "Success";
     res.setObject(obj);
@@ -38,3 +52,5 @@ QJsonDocument CommandExit::exec() {
 void CommandExit::setNick(const QString &nick) {
     nick_ = nick;
 }
+
+

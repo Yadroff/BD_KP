@@ -12,7 +12,9 @@
 #include "SenderReceiver.h"
 #include "CryptographAlice.h"
 #include "CommonHeader.h"
+#include "ChannelItem.h"
 #include "Channel.h"
+#include "Message.h"
 
 namespace Ui {
     class Window;
@@ -32,30 +34,17 @@ private:
     QSharedPointer<CryptographAlice> crypto_;
     QSharedPointer<Connector> connector_;
     QSharedPointer<SenderReceiver> sender_;
-    QString userName_;
-    QSet<QString> channels_;
+    QHash<QString, QSharedPointer<Channel>> channels_;
     QMovie loadGif_;
     bool isNewDialog_;
 
-    static bool checkUsername(const QString &str);
-
-    static bool checkLettersOnly(const QString &str);
-
-    void initUI();
-
-    void hideInput();
-
-    void showInput();
-
     QString user_style = "background: #73739b;"
                          "border-radius: 5px;"
-                         "color: black;"
-                         "font:10pt \"Open Sans\";";
+                         "color: black;";
 
     QString contact_style = "background: white;"
                             "border-radius: 5px;"
-                            "color: black;"
-                            "font:10pt \"Open Sans\";";
+                            "color: black;";
 
     QString user_bubble_style = "background: white;"
                                 "border-radius: 20;"
@@ -67,17 +56,44 @@ private:
                                    "color: white;"
                                    "font: 20pt \"Open Sans\";";
 
-    QString currentOpenChannel_ = "";
+    static bool checkUsername(const QString &str);
+
+    static bool checkLettersOnly(const QString &str);
+
+    void initUI();
+
+    void hideInput();
+
+    void showInput();
+
+    void loginSuccess(const QJsonObject &obj);
+
+    void readMessagesSuccess(const QJsonObject &obj);
+
+    void searchSuccess(const QJsonObject &obj);
+
+    QString currentChannel_ = "";
+
+    void eraseLayout(QLayout *layout);
+
+    void hideDialog();
+
+    void showDialog();
+
+    void setMessages(const QJsonDocument &messagesDoc);
+
+    QDateTime lastSendMessage_;
 
     QString lastSender_;
 
-    QDateTime lastMessage_;
+    void changeChannel(const QString &channelName);
 
-    void eraseLayout(QLayout *);
+    void addMessage(int messageID, const QString &sender, const QString &content, const QDateTime &sendDate,
+                    const QDateTime &editDate);
 
 private slots:
 
-    void setLogin(const QString &);
+    static void setLogin(const QString &);
 
     void connectToServer(const QString &);
 
@@ -89,11 +105,8 @@ private slots:
 
     void on_signup_button_clicked();
 
-    void on_channels_itemClicked(QListWidgetItem *item);
-
     void parseServerMessage(const QJsonDocument &doc);
 
-    void newMessage(const QString &sender, const QString &text, const QDateTime &date);
 
     void on_add_button_clicked();
 
@@ -104,6 +117,13 @@ private slots:
     void search_user_clicked();
 
     void on_send_button_clicked();
+
+
+    void on_channels_itemClicked(QListWidgetItem *item);
+
+    void search_channel_clicked();
+
+    void displayMessages();
 
 signals:
 

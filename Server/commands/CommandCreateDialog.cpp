@@ -67,7 +67,8 @@ QJsonDocument CommandCreateDialog::exec() {
         doc.setObject(obj);
         return doc;
     }
-    QString dialogName = qMin(user_->getUserName(), secondUser_) + DIALOG_SEPARATOR + qMax(user_->getUserName(), secondUser_);
+    QString dialogName =
+            qMin(user_->getUserName(), secondUser_) + DIALOG_SEPARATOR + qMax(user_->getUserName(), secondUser_);
     query.bindValue(":name", dialogName);
     query.bindValue(":first", firstID);
     if (!query.exec()) {
@@ -77,8 +78,8 @@ QJsonDocument CommandCreateDialog::exec() {
         doc.setObject(obj);
         return doc;
     }
-
-
+    obj["Channel"] = dialogName;
+    obj["ID"] = query.lastInsertId().toInt();
     for (int i = 1; i < CREATE_DIALOG_QUERIES; ++i) {
         if (!query.prepare(queries[i])) {
             std::cout << QTime::currentTime().toString().toStdString() << " COMMAND CREATE DIALOG: ERROR: "
@@ -101,7 +102,6 @@ QJsonDocument CommandCreateDialog::exec() {
             return doc;
         }
     }
-
     obj["Result"] = "SUCCESS";
     doc.setObject(obj);
     return doc;

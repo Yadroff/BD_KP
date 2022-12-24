@@ -16,5 +16,6 @@
 #include "commands/CommandReadMessages.h"
 #include "commands/NotifyNewMessage.h"
 #include "commands/CommandSearch.h"
+#include "commands/CommandAddToTempTable.h"
 
 #endif //SERVER_INCLUDESTOSERVER_H

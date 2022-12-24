@@ -121,6 +121,15 @@ QJsonDocument SenderReceiver::parseClientSend(const QString &str) {
         obj["Name"] = arguments[1];
         doc.setObject(obj);
         return doc;
+    } else if (command == COMMAND_CREATE_DIALOG) {
+        if (arguments.size() != COMMAND_CREATE_DIALOG_SIZE) {
+            std::cout << QTime::currentTime().toString().toStdString() << " ERROR: WRONG ARGUMENTS TO COMMAND "
+                      << command.toStdString() << std::endl;
+            return doc;
+        }
+        obj["User"] = arguments[1];
+        doc.setObject(obj);
+        return doc;
     } else {
         std::cout << QTime::currentTime().toString().toStdString() << " ERROR: WRONG COMMAND: "
                   << command.toStdString() << std::endl;
